@@ -1,16 +1,12 @@
 package demo_project;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 
-import javax.servlet.ServletConfig;
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
-import javax.servlet.ServletResponse;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -18,61 +14,53 @@ import javax.servlet.http.HttpServletResponse;
 
 @WebServlet("/RegisterServlet")
 public class RegisterServlet extends HttpServlet {
-	Connection con;
-
-	@Override
-	public void init(ServletConfig config) throws ServletException {
-
-		try {
-			Class.forName("com.mysql.cj.jdbc.Driver");
-			con = DriverManager.getConnection("jdbc:mysql://localhost:3306/pooja", "root", "pooja1234");
-		} catch (Exception e) {
-			e.getSuppressed();
-		}
-	}
+	private static final long serialVersionUID = 1L;
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		// TODO Auto-generated method stub
-//		doGet(request, response);
-
 		String email = request.getParameter("email");
-		String number = request.getParameter("phoneNumber");
+		String phoneNumber = request.getParameter("phoneNumber");
 		String address = request.getParameter("address");
 		String password = request.getParameter("password");
-		String confirm_password = request.getParameter("congirm_password");
+		String confirm_password = request.getParameter("confirmPassword");
 
 		try {
-			String q = "INSERT INTO user(email, number, address, password, confirm_password) VALUES(?,?,?,?,?)";
+			// Load the MySQL JDBC driver
+			Class.forName("com.mysql.cj.jdbc.Driver");
 
-			PreparedStatement p = con.prepareStatement(q);
+			// Establish a connection to the database
+			Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/pooja", "root",
+					"pooja1234");
 
-			p.setString(1, email);
-			p.setString(2, number);
-			p.setString(3, address);
-			p.setString(4, password);
-			p.setString(5, confirm_password);
+			// Prepare the SQL INSERT query
+			String insertQuery = "INSERT INTO user (email, phoneNumber, address, password, confirm_password) VALUES (?, ?, ?, ?, ?)";
+			PreparedStatement preparedStatement = connection.prepareStatement(insertQuery);
+			preparedStatement.setString(1, email);
+			preparedStatement.setString(2, phoneNumber);
+			preparedStatement.setString(3, address);
+			preparedStatement.setString(4, password);
+			preparedStatement.setString(5, confirm_password);
 
-			int rowsInserted = p.executeUpdate();
-		
-			if (rowsInserted > 0) {
-				String successMessage = "Registration successful!";
-				response.getWriter().write(successMessage);
-				
-			} else {
-				String errorMessage = "Registration failed. Please try again.";
-				response.getWriter().write(errorMessage);
-			}
+			// Execute the query
+			preparedStatement.executeUpdate();
 
-			con.close();
+			// Close resources
+			preparedStatement.close();
+			connection.close();
+
+			// Redirect to a success page
+			RequestDispatcher dispatcher = request.getRequestDispatcher("index.jsp");
+			dispatcher.forward(request, response);
+//            response.sendRedirect("WEB-INF/views/UserWelcome.jsp");
+//            System.out.println(email + phoneNumber + address + password + confirm_password);
+//    		System.out.println(connection);
 		} catch (Exception e) {
 			e.printStackTrace();
-			String errorMessage = "An error occurred. Please try again later.";
-			response.getWriter().write(errorMessage);
+
+			// Redirect to an error page
+			response.sendRedirect("");
 		}
-
-//		System.out.println(gmail + number + address + password + confirm_password);
-//		System.out.println(con);
+		RequestDispatcher dispatcher = request.getRequestDispatcher("index.jsp");
+		dispatcher.forward(request, response);
 	}
-
 }
