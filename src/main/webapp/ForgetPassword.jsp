@@ -9,9 +9,9 @@
 <body>
 	<div align="center">
 		<h1>Forgot Password</h1>
-		<form action="<%=request.getContextPath()%>/forgotPassword"
+		<form action="<%=request.getContextPath()%>/ForgotPasswordServlet"
 			method="post">
-			Email: <input type="email" name="email" required><br> <input
+			Email: <input type="email" name="email" required><br><br><br> <input
 				type="submit" value="Submit">
 		</form>
 	</div>
